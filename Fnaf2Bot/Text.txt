@@ -1,0 +1,193 @@
+
+----------------------------------------------------------------------------------
+|                                   FNAF 2                                       |
+----------------------------------------------------------------------------------
+
+Screen Data:
+----------------------------------------------------------------------------------
+Resolution: 1280x800
+Screen Brightness: 35 (in case brightness affects RGB values)
+
+----------------------------------------------------------------------------------
+Coordinates:
+----------------------------------------------------------------------------------
+
+Clock Position & RGB: (1223, 752) - R: 255, G: 255, B: 255
+
+Left Light Physical: X=194,Y=448
+Right Light Physical: X=1072,Y=440
+Camera: Physical: X=921,Y=751
+Prize Corner (While cam up): Physical: X=1190,Y=487
+Music Box (While cam up): Physical: X=541,Y=609
+Mask: X=314,Y=751
+----------------------------------------------------------------------------------
+Animatronic Coords and RGB:
+----------------------------------------------------------------------------------
+
+Hallway: (Golden Freddy)
+
+Golden Freddy Head: (308, 377) RGB: 88, 76, 56
+
+
+
+
+Left vent:
+
+ToyChica's shadow: Right-clicked at (203, 698) - R: 0, G: 0, B: 0
+
+BalloonBoy's shadow:  Right-clicked at (203, 698) - R: 0, G: 0, B: 0
+
+Sleep(5150); //mask down time to counter toy chica/balloon boy
+
+Right Vent:
+
+ToyBonnie's Eye (Greenish): RGB at (1158, 624): R = 19, G = 118, B = 44
+
+Toy Bonnie Right Eyebrow: (1186, 584) - R: 0, G: 16, B: 39
+
+
+Mangle's Right Eye (right edge):  (1197, 649) - R: 0, G: 0, B: 0
+Sleep(5150); // MAX mask down time to counter mangle
+
+--------------------------------------------------------------------------------------
+
+Pixel in mask eye hole used to detect blackout: (for blackoutFromToyBonnie() fn)
+
+X=752,Y=369
+--------------------------------------------------------------------------------------
+
+Pixel on mask to detect if mask still down (for blackoutAfterCam() fn)
+
+X=1154,Y=149
+
+--------------------------------------------------------------------------------------
+Pixel on wind button to detect if camera hasn't been forced down ( for checkIfCamDown())
+Coords: 1208,485
+Color vals: R: 194, G: 221, B: 0
+
+
+____________________________________________________________________________________________________________
+
+NOTE*************************************: 
+
+I) ALWAYS AFTER OPENING CAM ADD:
+"std::this_thread::sleep_for(std::chrono::milliseconds(200)); // wait for camera to open!!!"
+SO WINDING STARTS WHEN CAMERA OPENS!!!
+
+II) ALWAYS ADD "std::this_thread::sleep_for(std::chrono::milliseconds(100)); // LONGER DELAY REQUIRED!!"
+BETWEEN LIFTING MASK AND CALLING  "checkBlackoutAfterCam();"
+
+
+
+____________________________________________________________________________________________________________
+----------------------------------------------------------------------------------
+Algorithm:
+----------------------------------------------------------------------------------
+
+*****************************************************************************************************
+Toy bonnie blackout strategy:
+1) Pull mask down
+2) Keep down and wait, and if detects pixel rgb in freddy mask eye hole as black,
+	that means toy bonnie's blackout must have started!!!
+3) wait again a certain amount of seconds
+4) pull mask up
+
+*****************************************************************************************************
+Bonnie, chica, freddy, toy freddy blackout strategy:
+
+1) always pull mask down when camera goes down
+2) attempt to pull mask up almost immediately
+3) if still detects pixel that shows mask is still down after attempting to pull mask out,
+	that means there must be a blackout!!!
+4) wait a certain amount of seconds
+5) pull mask up
+
+(skip from step 1 to 5 if no blackout detected )
+
+
+
+
+----------------------------------------------------------
+
+Night Length: 7:00
+
+----------------------------------------------------------
+Strategy to minimize RNG:
+
+Cases:
+
+----------------------------------------------------------------------------
+I) Blackout:
+
+(cam up)(Drop camera) (pull up mask & flash hallway & right vent (No bonnie), so keep flashing until 1.5)
+  |-------------|                 |----|
+   1.5         5.5             1.2    1.5 --> continue (cam up)
+                |--------------|
+                  (Mask/Blackout time)
+
+II) Blackout and Toy bonnie STILL in vent:
+
+(cam up)(Drop camera) (pull up mask & flash hallway & right vent (BONNIE IS THERE!))
+  |-------------|               |
+   1.5         5.5             1.2               (Mask up) 1.5 --> continue (cam up)
+                |--------------| |------------------||----|
+              (Mask/Blackout time) (Bonnie Mask/Blackout time)(wait until next 1.5 to pull up camera while flashing)
+
+III) No blackout and toy bonnie IS in vent:
+
+(cam up)(Drop camera)                                  (wait until 1.5 to pull up camera while flashing)
+  |-------------||------------------------|                       |----|
+   1.5         5.5                        5.5               (Mask up)  1.5 --> continue (cam up)
+                                           |---------------------|
+                (pull up mask, BONNIE THERE! flash foxy until next 5.5)(Bonnie Mask/Blackout time)
+
+IV) No blackout and toy bonnie NOT in vent:
+
+(cam up)(Drop camera)
+  |-|   |-------||--------------------|
+   1.5         5.5                    1.5
+                 (check left vent, flash, and right vent. if there is someone in either vent,
+                 look right and pull down mask for 5.5 seconds. When mask is back up, check again.
+                 If nobody is in vents, flash until 1.5 and pull up camera)
+
+----------------------------------------------------------------------------
+
+
+Ending in 1.5 seconds: Pull up camera to wind music box
+
+Time ending in 5.5 to 6.0 seconds: Pull down camera to confront animatronic with mask
+
+When mask is on, wait extra 0.75 seconds before taking mask off
+
+Check right vent
+
+wait until next time ending in 1.5 until next 5.5 time
+
+ALWAYS drop camera between 5.5 and 6.0 time and never before 5.5 (because still in foxy killing interval)
+
+Whenever u open camera, flash puppet once, just in case they are about to go to freeze them temporarily.
+
+------------------------------------------------------
+When there is no blackcout after camera drop (problem)
+
+2 Situations to look out for:
+
+1) If you pull down the camera and toy bonnie is in the vent,
+wait to pull down mask until 5.5 time arrives
+(means you can stay on cycle without an immediate blackout,
+but means u have to wait until next 5.5 interval without winding the music box,
+so just wait in the office and flash the hallway (with enough music box time to spare because of
+this strategy))
+If toy bonnie is camping in the vent for too long, pull the mask up, flash foxy, and pull it down again
+
+2) If you pull down the camera and there is no blackout and no toy bonnie:
+
+Get rid of any vent animatronics before the next 1.5 interval, since all vent animatronics leave
+after 5 seconds. Make sure you dont wait too long, since with no blackout and no toy bonnie blackout
+the timing with foxy will be EXTREMELY strict.
+
+-------------------------------------------------------
+No matter what the situation is, you need to make sure you are getting back on to that
+1.5 to 5.5 cycle.
+Going off cycle will give an animatronic the chance to pull down your camera after a second
+or two, resulting in the music box running out.
